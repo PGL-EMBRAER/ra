@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Validação RA - Embarques Aéreos Embraer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --azul-embraer: #004680;
+            --cinza-embraer: #58595B;
+            --verde-embraer: #8DC63F;
+            --amarelo-embraer: #FFD100;
+            --vermelho-embraer: #ED1C24;
+            --branco: #FFFFFF;
+            --cinza-claro: #F5F5F5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--cinza-claro);
+            color: var(--cinza-embraer);
+        }
+
+        header {
+            background-color: var(--azul-embraer);
+            color: var(--branco);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 40px;
+            margin-right: 1rem;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .user-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-selector {
+            margin-right: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--branco);
+        }
+
+        .user-selector option {
+            background-color: var(--branco);
+            color: var(--cinza-embraer);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background-color: var(--branco);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            color: var(--azul-embraer);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--cinza-claro);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--azul-embraer);
+            color: var(--branco);
+        }
+
+        .btn-primary:hover {
+            background-color: #003a6a;
+        }
+
+        .btn-secondary {
+            background-color: var(--cinza-claro);
+            color: var(--cinza-embraer);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e5e5e5;
+        }
+
+        .btn-success {
+            background-color: var(--verde-embraer);
+            color: var(--branco);
+        }
+
+        .btn-success:hover {
+            background-color: #7ab32f;
+        }
+
+        .btn-warning {
+            background-color: var(--amarelo-embraer);
+            color: var(--cinza-embraer);
+        }
+
+        .btn-warning:hover {
+            background-color: #e6bc00;
+        }
+
+        .btn-danger {
+            background-color: var(--vermelho-embraer);
+            color: var(--branco);
+        }
+
+        .btn-danger:hover {
+            background-color: #d41920;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: var(--azul-embraer);
+            color: var(--branco);
+            text-align: left;
+            padding: 0.75rem;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--cinza-claro);
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background-color: rgba(0, 70, 128, 0.05);
+        }
+
+        .status-pendente-pgl {
+            background-color: rgba(255, 209, 0, 0.1);
+        }
+
+        .status-pendente-aprovacao {
+            background-color: rgba(255, 209, 0, 0.1);
+        }
+
+        .status-rejeitado {
+            background-color: rgba(237, 28, 36, 0.1);
+        }
+
+        .status-aprovado {
+            background-color: rgba(141, 198, 63, 0.1);
+        }
+
+        .status-validado-ok {
+            background-color: rgba(141, 198, 63, 0.2);
+        }
+
+        .status-validado-divergencia {
+            background-color: rgba(237, 28, 36, 0.1);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .badge-pendente-pgl {
+            background-color: var(--amarelo-embraer);
+            color: var(--cinza-embraer);
+        }
+
+        .badge-pendente-aprovacao {
+            background-color: var(--amarelo-embraer);
+            color: var(--cinza-embraer);
+        }
+
+        .badge-rejeitado {
+            background-color: var(--vermelho-embraer);
+            color: var(--branco);
+        }
+
+        .badge-aprovado {
+            background-color: var(--verde-embraer);
+            color: var(--branco);
+        }
+
+        .badge-validado-ok {
+            background-color: var(--verde-embraer);
+            color: var(--branco);
+        }
+
+        .badge-validado-divergencia {
+            background-color: var(--vermelho-embraer);
+            color: var(--branco);
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            background-color: var(--cinza-claro);
+            color: var(--cinza-embraer);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background-color: var(--azul-embraer);
+            color: var(--branco);
+        }
+
+        .search-input {
+            padding: 0.5rem;
+            border: 1px solid var(--cinza-claro);
+            border-radius: 4px;
+            width: 200px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--branco);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--azul-embraer);
+            color: var(--branco);
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .modal-footer {
+            padding: 1rem;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid var(--cinza-claro);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--branco);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--cinza-claro);
+            border-radius: 4px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -0.5rem;
+        }
+
+        .form-col {
+            flex: 1;
+            padding: 0 0.5rem;
+            min-width: 200px;
+        }
+
+        .validation-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        .validation-ok {
+            background-color: rgba(141, 198, 63, 0.1);
+            border: 1px solid var(--verde-embraer);
+        }
+
+        .validation-divergence {
+            background-color: rgba(237, 28, 36, 0.1);
+            border: 1px solid var(--vermelho-embraer);
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .comparison-table th {
+            background-color: var(--cinza-claro);
+            color: var(--cinza-embraer);
+        }
+
+        .comparison-match {
+            color: var(--verde-embraer);
+        }
+
+        .comparison-diverge {
+            color: var(--vermelho-embraer);
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--cinza-embraer);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--cinza-claro);
+        }
+
+        .empty-state p {
+            margin-bottom: 1rem;
+        }
+
+        .feedback-box {
+            background-color: rgba(255, 209, 0, 0.1);
+            border: 1px solid var(--amarelo-embraer);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-item {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--cinza-claro);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-date {
+            font-size: 0.8rem;
+            color: var(--cinza-embraer);
+        }
+
+        .history-action {
+            font-weight: 500;
+        }
+
+        .history-user {
+            font-style: italic;
+        }
+
+        .history-comment {
+            margin-top: 0.25rem;
+            padding-left: 1rem;
+            border-left: 3px solid var(--cinza-claro);
+        }
+
+        .month-selector {
+            display: flex;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .month-btn {
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            border-radius: 4px;
+            background-color: var(--cinza-claro);
+            color: var(--cinza-embraer);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .month-btn.active {
+            background-color: var(--azul-embraer);
+            color: var(--branco);
+        }
+
+        .month-header {
+            background-color: var(--cinza-claro);
+            padding: 0.5rem 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .direct-action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        footer {
+            background-color: var(--azul-embraer);
+            color: var(--branco);
+            padding: 1rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-online {
+            background-color: var(--verde-embraer);
+        }
+
+        .status-offline {
+            background-color: var(--cinza-claro);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--cinza-claro);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--azul-embraer);
+            color: var(--azul-embraer);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .field-comparison {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .field-status {
+            margin-left: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .field-match {
+            color: var(--verde-embraer);
+        }
+
+        .field-diverge {
+            color: var(--vermelho-embraer);
+        }
+
+        .comparison-section {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--cinza-claro);
+        }
+
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--azul-embraer);
+        }
+
+        .comparison-row {
+            display: flex;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .comparison-field {
+            flex: 1;
+        }
+
+        .comparison-arrow {
+            margin: 0 1rem;
+            color: var(--cinza-embraer);
+        }
+
+        .comparison-result {
+            width: 30px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin: 1.5rem 0 1rem;
+            color: var(--azul-embraer);
+            border-bottom: 1px solid var(--cinza-claro);
+            padding-bottom: 0.5rem;
+        }
+
+        .side-by-side {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .side-column {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid var(--cinza-claro);
+            border-radius: 4px;
+        }
+
+        .side-column h4 {
+            margin-bottom: 1rem;
+            color: var(--azul-embraer);
+            text-align: center;
+        }
+
+        .comparison-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .indicator-match {
+            background-color: var(--verde-embraer);
+        }
+
+        .indicator-diverge {
+            background-color: var(--vermelho-embraer);
+        }
+
+        .indicator-neutral {
+            background-color: var(--cinza-claro);
+        }
+
+        .field-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+
+        .field-label {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .field-value {
+            flex: 2;
+        }
+
+        .field-value input, .field-value select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--cinza-claro);
+            border-radius: 4px;
+        }
+
+        .field-value input:disabled, .field-value select:disabled {
+            background-color: var(--cinza-claro);
+            opacity: 0.7;
+        }
+
+        .field-value input.match {
+            border-color: var(--verde-embraer);
+            background-color: rgba(141, 198, 63, 0.1);
+        }
+
+        .field-value input.diverge {
+            border-color: var(--vermelho-embraer);
+            background-color: rgba(237, 28, 36, 0.1);
+        }
+
+        .comparison-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .comparison-legend {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .legend-match {
+            background-color: var(--verde-embraer);
+        }
+
+        .legend-diverge {
+            background-color: var(--vermelho-embraer);
+        }
+
+        .legend-neutral {
+            background-color: var(--cinza-claro);
+        }
+
+        .comparison-summary {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .summary-ok {
+            background-color: rgba(141, 198, 63, 0.1);
+            color: var(--verde-embraer);
+        }
+
+        .summary-diverge {
+            background-color: rgba(237, 28, 36, 0.1);
+            color: var(--vermelho-embraer);
+        }
+
+        .summary-neutral {
+            background-color: rgba(88, 89, 91, 0.1);
+            color: var(--cinza-embraer);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 1rem 0.5rem;
+            }
+
+            .logo-container {
+                margin-bottom: 1rem;
+            }
+
+            .user-controls {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-group {
+                margin-bottom: 1rem;
+                width: 100%;
+                overflow-x: auto;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .footer-content {
+                flex-direction: column;
+            }
+
+            .connection-status {
+                margin-top: 1rem;
+            }
+
+            .form-col {
+                flex: 100%;
+            }
+
+            .side-by-side {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Embraer_logo.svg/2560px-Embraer_logo.svg.png" alt="Logo Embraer" class="logo">
+            <h1 class="app-title">Sistema de Validação com Aprovação - Embarques Aéreos</h1>
+        </div>
+        <div class="user-controls">
+            <select id="userSelector" class="user-selector">
+                <option value="pgl">Usuário PGL</option>
+                <option value="embraer">Usuário Embraer (Logística)</option>
+            </select>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <div class="card-title">
+                <h2>Embarques Aéreos</h2>
+                <div>
+                    <button id="addShipmentBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Adicionar Novo Embarque
+                    </button>
+                </div>
+            </div>
+
+            <div class="month-selector" id="monthSelector">
+                <!-- Meses serão adicionados dinamicamente -->
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="todos">Todos</button>
+                    <button class="filter-btn" data-filter="pendente-pgl">Pendente PGL</button>
+                    <button class="filter-btn" data-filter="pendente-aprovacao">Pendente Aprovação</button>
+                    <button class="filter-btn" data-filter="rejeitado">Rejeitado</button>
+                    <button class="filter-btn" data-filter="aprovado">Aprovado</button>
+                    <button class="filter-btn" data-filter="validado-ok">Validado OK</button>
+                    <button class="filter-btn" data-filter="validado-divergencia">Com Divergências</button>
+                </div>
+                <div class="search-group">
+                    <input type="text" placeholder="Buscar..." class="search-input" id="searchInput">
+                </div>
+            </div>
+
+            <div id="shipmentsContainer">
+                <!-- Conteúdo será preenchido dinamicamente por mês -->
+            </div>
+
+            <div id="emptyState" class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h3>Nenhum embarque cadastrado</h3>
+                <p>Clique em "Adicionar Novo Embarque" para começar.</p>
+            </div>
+
+            <div class="card-title" style="margin-top: 2rem;">
+                <h2>Exportação</h2>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button id="exportExcelBtn" class="btn btn-primary">
+                    <i class="fas fa-file-excel"></i> Exportar para Excel
+                </button>
+                <button id="clearAllBtn" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Limpar Todos os Dados
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para Lançamento de Dados Unificado -->
+    <div id="shipmentDataModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="shipmentModalTitle">Lançamento de Dados</h3>
+                <button class="close-modal" data-modal="shipmentDataModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="shipmentForm">
+                    <input type="hidden" id="shipmentId">
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="mesReferencia">Mês de Referência</label>
+                                <select id="mesReferencia" class="form-control" required>
+                                    <option value="">Selecione o mês</option>
+                                    <option value="01">Janeiro</option>
+                                    <option value="02">Fevereiro</option>
+                                    <option value="03">Março</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Maio</option>
+                                    <option value="06">Junho</option>
+                                    <option value="07">Julho</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Setembro</option>
+                                    <option value="10">Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-header">
+                        <h3>Dados do Embarque</h3>
+                        <div class="comparison-legend">
+                            <div class="legend-item">
+                                <div class="legend-color legend-match"></div>
+                                <span>Coincide</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color legend-diverge"></div>
+                                <span>Diverge</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color legend-neutral"></div>
+                                <span>Não comparado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="side-by-side">
+                        <div class="side-column">
+                            <h4>Dados PGL</h4>
+                            
+                            <h5 class="section-title">Dados Básicos</h5>
+                            <div class="field-row">
+                                <div class="field-label">Empresa</div>
+                                <div class="field-value">
+                                    <input type="text" id="pgl_Empresa" name="pgl_Empresa" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Master</div>
+                                <div class="field-value">
+                                    <input type="text" id="pgl_Master" name="pgl_Master" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">House</div>
+                                <div class="field-value">
+                                    <input type="text" id="pgl_House" name="pgl_House" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Data House</div>
+                                <div class="field-value">
+                                    <input type="date" id="pgl_DataHouse" name="pgl_DataHouse" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Prioridade</div>
+                                <div class="field-value">
+                                    <input type="text" id="pgl_Prioridade" name="pgl_Prioridade" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Origem</div>
+                                <div class="field-value">
+                                    <input type="text" id="pgl_Origem" name="pgl_Origem" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Destino</div>
+                                <div class="field-value">
+                                    <input type="text" id="pgl_Destino" name="pgl_Destino" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Peso Bruto</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_PesoBruto" name="pgl_PesoBruto" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Peso Cubado</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_PesoCubado" name="pgl_PesoCubado" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Peso Taxado</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_PesoTaxado" name="pgl_PesoTaxado" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">PTAX (Bacen)</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_PTAX" name="pgl_PTAX" class="form-control" step="0.0001">
+                                </div>
+                            </div>
+                            
+                            <h5 class="section-title">Dados Adicionais</h5>
+                            <div class="field-row">
+                                <div class="field-label">Dimensões</div>
+                                <div class="field-value">
+                                    <input type="text" id="pgl_Dimensoes" name="pgl_Dimensoes" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Ítem Especial Tabela PGL</div>
+                                <div class="field-value">
+                                    <input type="text" id="pgl_ItemEspecial" name="pgl_ItemEspecial" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Rate Frete</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_RateFrete" name="pgl_RateFrete" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Rate Screening Fee</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_RateScreening" name="pgl_RateScreening" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Rate Security Fee</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_RateSecurity" name="pgl_RateSecurity" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Frete EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_FreteEUR" name="pgl_FreteEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Screening Fee EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_ScreeningEUR" name="pgl_ScreeningEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Security Fee EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_SecurityEUR" name="pgl_SecurityEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Combustível "Fuel" EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_FuelEUR" name="pgl_FuelEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Total PGL EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_TotalEUR" name="pgl_TotalEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Total PGL R$</div>
+                                <div class="field-value">
+                                    <input type="number" id="pgl_TotalBRL" name="pgl_TotalBRL" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="side-column">
+                            <h4>Dados Embraer</h4>
+                            
+                            <h5 class="section-title">Dados Básicos</h5>
+                            <div class="field-row">
+                                <div class="field-label">Empresa</div>
+                                <div class="field-value">
+                                    <input type="text" id="embraer_Empresa" name="embraer_Empresa" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Master</div>
+                                <div class="field-value">
+                                    <input type="text" id="embraer_Master" name="embraer_Master" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">House</div>
+                                <div class="field-value">
+                                    <input type="text" id="embraer_House" name="embraer_House" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Data House</div>
+                                <div class="field-value">
+                                    <input type="date" id="embraer_DataHouse" name="embraer_DataHouse" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Prioridade</div>
+                                <div class="field-value">
+                                    <input type="text" id="embraer_Prioridade" name="embraer_Prioridade" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Origem</div>
+                                <div class="field-value">
+                                    <input type="text" id="embraer_Origem" name="embraer_Origem" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Destino</div>
+                                <div class="field-value">
+                                    <input type="text" id="embraer_Destino" name="embraer_Destino" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Peso Bruto</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_PesoBruto" name="embraer_PesoBruto" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Peso Cubado</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_PesoCubado" name="embraer_PesoCubado" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Peso Taxado</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_PesoTaxado" name="embraer_PesoTaxado" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">PTAX (Bacen)</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_PTAX" name="embraer_PTAX" class="form-control" step="0.0001">
+                                </div>
+                            </div>
+                            
+                            <h5 class="section-title">Dados Adicionais</h5>
+                            <div class="field-row">
+                                <div class="field-label">Dimensões</div>
+                                <div class="field-value">
+                                    <input type="text" id="embraer_Dimensoes" name="embraer_Dimensoes" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Ítem Especial Tabela PGL</div>
+                                <div class="field-value">
+                                    <input type="text" id="embraer_ItemEspecial" name="embraer_ItemEspecial" class="form-control">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Rate Frete</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_RateFrete" name="embraer_RateFrete" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Rate Screening Fee</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_RateScreening" name="embraer_RateScreening" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Rate Security Fee</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_RateSecurity" name="embraer_RateSecurity" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Frete EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_FreteEUR" name="embraer_FreteEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Screening Fee EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_ScreeningEUR" name="embraer_ScreeningEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Security Fee EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_SecurityEUR" name="embraer_SecurityEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Combustível "Fuel" EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_FuelEUR" name="embraer_FuelEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Total PGL EUR</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_TotalEUR" name="embraer_TotalEUR" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                            <div class="field-row">
+                                <div class="field-label">Total PGL R$</div>
+                                <div class="field-value">
+                                    <input type="number" id="embraer_TotalBRL" name="embraer_TotalBRL" class="form-control" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Área de feedback da Embraer (visível apenas quando rejeitado) -->
+                    <div id="feedbackArea" style="display: none;">
+                        <div class="feedback-box">
+                            <div class="feedback-title">Feedback da Embraer:</div>
+                            <div id="feedbackContent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Área de comentários para rejeição -->
+                    <div id="rejectionCommentsArea" style="display: none;">
+                        <div class="form-group">
+                            <label for="rejectionComments">Comentários (obrigatório para rejeição)</label>
+                            <textarea id="rejectionComments" class="form-control" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Área de resultado da comparação -->
+                    <div id="comparisonResultArea" style="display: none;">
+                        <div class="comparison-section">
+                            <h4 class="comparison-title">Resultado da Comparação</h4>
+                            <div id="comparisonResult">
+                                <!-- Será preenchido dinamicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal="shipmentDataModal">Cancelar</button>
+                <button id="rejectBtn" class="btn btn-danger" style="display: none;">Rejeitar</button>
+                <button id="approveBtn" class="btn btn-success" style="display: none;">Aprovar</button>
+                <button id="saveDataBtn" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Validação -->
+    <div id="validationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Validação de Embarque</h3>
+                <button class="close-modal" data-modal="validationModal">&times;</button>
+            </div>
+            <div class="modal-body" id="validationModalBody">
+                <!-- Conteúdo será preenchido dinamicamente -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal="validationModal">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Histórico -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Histórico do Embarque</h3>
+                <button class="close-modal" data-modal="historyModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="historyContent">
+                    <!-- Histórico será preenchido dinamicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal="historyModal">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="copyright">
+                &copy; 2025 Sistema de Validação RA - Embraer
+            </div>
+            <div class="connection-status">
+                <div class="status-indicator status-online"></div>
+                <span>Online</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
